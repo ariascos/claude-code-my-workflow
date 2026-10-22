@@ -7,7 +7,7 @@ Calibration data for the `/review-paper --peer [journal]` simulated peer-review 
 
 **How this file is used.** The `editor` agent reads this file before each `--peer` run, picks the requested `[journal]`, and uses its Referee-pool weights + Typical concerns to select two referees with different dispositions and to seed their pet-peeve priors.
 
-**Customizing for your field.** This file ships with **five top-5 econ journals** as a concrete example. To use `--peer` for a different field (finance, political science, biology, CS, etc.), copy `templates/journal-profile-template.md` into a new section below, fill in the schema, and reference it by the short name you define. See the [Field adaptation](#field-adaptation) section at the bottom.
+**Customizing for your field.** This file ships **eight profiles**: five econ (AER, QJE, JPE, ECMA, ReStud) and three political science (APSR, AJPS, JOP). To use `--peer` for another field (finance, biology, CS, etc.), copy `templates/journal-profile-template.md` into a new section below, fill in the schema, and reference it by the short name you define. See the [Field adaptation](#field-adaptation) section at the bottom.
 
 ---
 
@@ -27,6 +27,8 @@ Every profile has these fields:
 ---
 
 ## Econ Top-5
+
+> **AEA Data Editor / DCAS policy (applies to all AEA-imprint journals — AER, AEJ:*, JEL, JEP).** Acceptance is conditional on a replication package that clears the **AEA Data and Code Availability Standard** under the Data Editor: a complete deposit (openICPSR), a data availability statement, and code that reproduces every reported number. Run [`/replication-package`](../skills/replication-package/SKILL.md) (which gates on [`/audit-reproducibility`](../skills/audit-reproducibility/SKILL.md)) before submission; for restricted data, deposit cleared outputs + access instructions per [`confidential-data.md`](../rules/confidential-data.md). Econometrica, ReStud, and the political-science journals below enforce comparable archives at acceptance.
 
 ### American Economic Review (AER)
 
@@ -60,7 +62,7 @@ Every profile has these fields:
 - THEORY: 0.05
 - SKEPTIC: 0.10
 
-**Table format override.** No significance stars (AEA policy since 2023). Use SE in parentheses only; indicate p-values in notes if needed.
+**Table format override.** No significance stars (AEA style guidance). Use SE in parentheses only; indicate p-values in notes if needed.
 
 ---
 
@@ -201,9 +203,118 @@ Every profile has these fields:
 
 ---
 
+## Political Science (Top-3)
+
+Three flagship general-interest political-science journals. The `paper_type` taxonomy here typically resolves to `reduced-form`, `formal-theory`, or `survey-experiment` (added in v1.8.0 to support these journals). Other types still apply when relevant.
+
+### American Political Science Review (APSR)
+
+**Short name:** `APSR`
+
+**Focus.** Highest-bar general-interest political-science journal; APSA's flagship. Publishes across IR, comparative politics, American politics, formal theory, and political theory. Strongest preference for theoretically motivated work that speaks to multiple subfields.
+
+**Bar.** "Top-3 in your subfield should know this." A clear theoretical contribution is load-bearing — purely descriptive or purely empirical papers without a theoretical home rarely clear desk.
+
+**Domain-referee adjustments.**
+- Contribution 30 → 35 (theoretical-importance bar is high)
+- Lit positioning 25 → 25 (unchanged)
+- Fit 10 → 5 (APSR publishes broadly across subfields; fit is rarely a binding constraint)
+
+**Methods-referee adjustments.**
+- Identification 35 → 30 (still cared about, but APSR rewards theoretical novelty even when identification is observational)
+- For `formal-theory` papers: Comparative-static sharpness 25 → 30 (the theoretical contribution must produce sharp predictions)
+- For `survey-experiment` papers: Sampling-frame validity is a desk-level concern; convenience samples (uncalibrated MTurk) face an uphill battle.
+
+**Typical concerns.**
+- "Where is the theoretical contribution? What would a theorist in a different subfield take from this?"
+- "Is the design appropriate to the population the paper claims to speak about?"
+- "Does the paper engage seriously with formal theory, or only with reduced-form empirics?"
+- "Is the conclusion testable, or vacuous?"
+
+**Referee-pool weights.**
+- THEORY: 0.30
+- CREDIBILITY: 0.20
+- STRUCTURAL: 0.15
+- MEASUREMENT: 0.15
+- POLICY: 0.10
+- SKEPTIC: 0.10
+
+**Table format override.** Footnotes and citations follow APSA Style Manual; tables typically use significance stars (* p<0.05, ** p<0.01, *** p<0.001 — note 0.05 floor differs from AEA convention).
+
+### American Journal of Political Science (AJPS)
+
+**Short name:** `AJPS`
+
+**Focus.** General political-science journal with strong methods orientation. AJPS is the methodologists' favourite among the top-3 — receptive to causal-inference, survey experiments, formal-empirical work, and methodological innovation alongside substantive contribution.
+
+**Bar.** "The method is at least as interesting as the substance." Not a methods-only journal, but methodologically novel papers compete favourably with merely-clean empirical work. AJPS Replication Policy (since 2015) is enforced — replication archive is mandatory at acceptance.
+
+**Domain-referee adjustments.**
+- Contribution 30 → 30 (unchanged)
+- Lit positioning 25 → 25 (unchanged)
+- External validity 15 → 20 (AJPS expects engagement with whether the result generalises beyond the specific setting)
+
+**Methods-referee adjustments.**
+- Identification 35 → 40 (the credibility bar is real)
+- Inference 20 → 20 (unchanged)
+- For `survey-experiment` papers: Manipulation checks and balance tables are mandatory in the manuscript; absence is a desk-level concern.
+- Replication 5 → 10 (AJPS replication policy)
+
+**Typical concerns.**
+- "Is identification credible to a methodologist who has read the recent econometrics literature?"
+- "Is the design pre-registered? If not, why not?"
+- "Are the standard errors clustered at the right level, with the right type of clustering for the design?"
+- "Is the replication archive complete (data, code, README)?"
+- "Does the method scale to other contexts the paper gestures at?"
+
+**Referee-pool weights.**
+- CREDIBILITY: 0.30
+- MEASUREMENT: 0.20
+- STRUCTURAL: 0.15
+- THEORY: 0.15
+- SKEPTIC: 0.10
+- POLICY: 0.10
+
+**Table format override.** APSA Style; significance stars allowed (0.05/0.01/0.001 floor); regression tables typically include observations, R², and SE-clustering specification.
+
+### Journal of Politics (JOP)
+
+**Short name:** `JOP`
+
+**Focus.** Top-3 political-science journal alongside APSR and AJPS, with a slight tilt toward American politics and comparative politics. Publishes across all subfields; receptive to shorter, sharper papers ("research notes" track) alongside full articles.
+
+**Bar.** "A clear contribution to a substantive question that political scientists care about." Lower theoretical-novelty bar than APSR; lower methods-novelty bar than AJPS — but a higher *clarity-of-contribution* bar than either. The desk asks: "what specifically does this paper teach me?"
+
+**Domain-referee adjustments.**
+- Contribution 30 → 35 (clarity of contribution is the binding constraint)
+- Substance 20 → 25 (JOP rewards a tight argument over a broad one)
+- Fit 10 → 5 (JOP publishes broadly)
+
+**Methods-referee adjustments.**
+- Identification 35 → 35 (unchanged)
+- Robustness 15 → 20 (JOP referees frequently push back on robustness)
+
+**Typical concerns.**
+- "What specifically does this paper add that we didn't already know?"
+- "Is the argument tight, or is it three loosely-related claims?"
+- "Are the robustness checks responsive to obvious threats, or are they ritual?"
+- "Could this be a research note (8,000 words) instead of a full article?"
+
+**Referee-pool weights.**
+- SKEPTIC: 0.25
+- CREDIBILITY: 0.20
+- THEORY: 0.15
+- MEASUREMENT: 0.15
+- STRUCTURAL: 0.15
+- POLICY: 0.10
+
+**Table format override.** APSA Style; standard significance stars allowed.
+
+---
+
 ## Field adaptation
 
-The five profiles above are econ-specific. The **pipeline is field-agnostic** — nothing in `editor.md`, `domain-referee.md`, or `methods-referee.md` hard-codes economics. What varies by field is the journal profile.
+Five of the eight profiles above are econ; three are political science. The **pipeline is field-agnostic** — nothing in `editor.md`, `domain-referee.md`, or `methods-referee.md` hard-codes economics. What varies by field is the journal profile.
 
 **To adapt for a different field:**
 
@@ -217,12 +328,13 @@ The five profiles above are econ-specific. The **pipeline is field-agnostic** �
    - **Referee-pool weights** — the 6 dispositions are general enough to apply to any field. Re-weight based on what that journal's referees actually ask about. Weights must sum to 1.0.
    - **Table format** — any field-specific conventions (e.g., APA tables for psychology, Chicago-style footnotes for history, Vancouver citations for medicine).
 
-**For non-econ paper types.** The `methods-referee.md` paper-type branching uses `reduced-form / structural / theory+empirics / descriptive`. If your field uses different categories (e.g., biology: `observational / experimental / computational / review`; political science: `case-study / comparative / formal-model / survey`), edit `methods-referee.md` to add your field's paper types and their dimension weights. Keep the `reduced-form` / etc. branches for econ users.
+**For non-econ paper types.** The `methods-referee.md` paper-type branching ships six types: `reduced-form / structural / theory+empirics / descriptive / formal-theory / survey-experiment` (the last two added in v1.8.0 for political science). If your field needs more (e.g., biology: `observational / experimental / computational / review`; political science: `case-study / comparative`), edit `methods-referee.md` to add them with their dimension weights. Keep the shipped branches intact.
 
-**Examples for non-econ fields** (to be filled in by adopters — we ship econ only):
+**Examples for fields we don't yet ship** (to be filled in by adopters — we ship econ + political-science as concrete profiles; psych / sociology / public health are template-only):
 
 - `### Nature Human Behaviour (NHB)` — flagship interdisciplinary. Bar: broad impact + pre-registration + replication. Referee weights: MEASUREMENT high, CREDIBILITY high.
-- `### Journal of Politics (JOP)` — political science. Bar: theoretical contribution + identification. Referee weights: THEORY high, CREDIBILITY medium.
+- `### Psychological Science` — flagship psych. Bar: open-science compliance + theoretical contribution. Referee weights: CREDIBILITY high, MEASUREMENT high. Preregistration expected.
+- `### American Journal of Sociology (AJS)` — top sociology. Bar: theoretical contribution + careful argument. Referee weights: THEORY medium, SKEPTIC medium, MEASUREMENT medium.
 - `### PNAS` — multi-disciplinary. Bar: generalizability + public interest. Referee weights: POLICY high, SKEPTIC high.
 
 ---

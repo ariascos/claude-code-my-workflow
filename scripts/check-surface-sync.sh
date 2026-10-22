@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs two pre-commit gates:
+# Runs the following pre-commit gates:
 #   1. check-surface-sync.py — count assertions (skills/agents/rules/hooks)
 #      agree across README, CLAUDE.md, guide source + rendered HTML,
 #      landing page, skill template.
@@ -9,10 +9,17 @@
 #      keyword parity.
 #      Exit codes: 0 = clean OR only P2 advisories, 1 = P0/P1 findings,
 #      2 = internal script error.
+#   3. check-model-versions.sh — flags superseded Claude model versions
+#      presented as current in user-facing surfaces.
+#      SSoT: .claude/references/model-versions.md.
+#      Exit codes: 0 = clean, 1 = drift, 2 = internal error.
+#   4. check-links.py — every relative markdown link and heading anchor
+#      resolves. Catches renamed/removed files and stale cross-references.
+#      Exit codes: 0 = clean, 1 = broken reference(s).
 #
-# Both tools run to completion even if the other fails — the user sees
-# the full picture on a single invocation. The wrapper's final exit code
-# is the max of the two (any failure propagates).
+# All tools run to completion even if one fails — the user sees the full
+# picture on a single invocation. The wrapper's final exit code is the max
+# of all of them (any failure propagates).
 #
 # We deliberately do NOT use `set -e` because that would abort after the
 # first gate fails, hiding the second gate's output. We use `set -uo
@@ -35,8 +42,19 @@ echo "── check-skill-integrity ──"
 python3 "$SCRIPT_DIR/check-skill-integrity.py" "$@"
 INTEGRITY_RC=$?
 
-if [ "$SYNC_RC" -gt "$INTEGRITY_RC" ]; then
-    exit "$SYNC_RC"
-else
-    exit "$INTEGRITY_RC"
-fi
+echo ""
+echo "── check-model-versions ──"
+"$SCRIPT_DIR/check-model-versions.sh"
+MODELS_RC=$?
+
+echo ""
+echo "── check-links ──"
+python3 "$SCRIPT_DIR/check-links.py"
+LINKS_RC=$?
+
+# Final exit code is the max of all gates (any failure propagates).
+RC="$SYNC_RC"
+[ "$INTEGRITY_RC" -gt "$RC" ] && RC="$INTEGRITY_RC"
+[ "$MODELS_RC" -gt "$RC" ] && RC="$MODELS_RC"
+[ "$LINKS_RC" -gt "$RC" ] && RC="$LINKS_RC"
+exit "$RC"
